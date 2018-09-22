@@ -1,0 +1,3 @@
+How to add vim syntax?
+	> mkdir ~/.vim
+	> cp -r vim_syntax/* ~/.vim 

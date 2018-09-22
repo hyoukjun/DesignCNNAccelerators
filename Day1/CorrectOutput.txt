@@ -1,0 +1,48 @@
+./scripts/compile -r
+
+Cycle     0 ----------------------------------------------------
+Requests from 1, 2, 3
+Requester           1 won the arbitration
+** Correct Output **
+
+Cycle     1 ----------------------------------------------------
+Requests from 2, 3
+Requester           2 won the arbitration
+** Correct Output **
+
+Cycle     2 ----------------------------------------------------
+Requests from 0, 3
+Requester           0 won the arbitration
+** Correct Output **
+
+Cycle     3 ----------------------------------------------------
+Requests from 3
+Requester           3 won the arbitration
+** Correct Output **
+
+Cycle     4 ----------------------------------------------------
+Requests from 2, 3
+Requester           2 won the arbitration
+** Correct Output **
+
+Cycle     5 ----------------------------------------------------
+Requests from 0, 1, 2, 3
+Requester           0 won the arbitration
+** Correct Output **
+
+Cycle     6 ----------------------------------------------------
+No requests
+
+Cycle     7 ----------------------------------------------------
+No requests
+
+Cycle     8 ----------------------------------------------------
+Requests from 1, 3
+Requester           1 won the arbitration
+** Correct Output **
+
+Cycle     9 ----------------------------------------------------
+No requests
+
+Cycle    10 ----------------------------------------------------
+No requests

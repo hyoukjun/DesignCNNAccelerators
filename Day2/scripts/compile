@@ -1,0 +1,73 @@
+#!/bin/bash
+#Copyright (c) 2017 
+	#Hyoukjun Kwon (hyoukjun@gatech.edu)
+
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+
+#The above copyright notice and this permission notice shall be included in all
+#copies or substantial portions of the Software.
+
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#SOFTWARE.
+
+SRCPATH=./
+LOGDIR=./Log
+BUILDDIR=./build
+CXXFLAGS="-Wall -Wno-unused -O0 -g -D_FILE_OFFSET_BITS=64 -j 2"
+
+SRCDIR="./src"
+LIBDIR="./lib"
+TBDIR="$SRCDIR/Testbenches"
+
+INCLUDE="$LIBDIR:$SRCDIR"
+
+DEBUGFLAGS='
+            -D DUMMY
+            '
+
+function clean {
+	rm -rf $BUILDDIR
+	rm -rf $LOGDIR
+    rm -rf Verilog
+	rm -rf *.v
+	rm -rf ./bdir
+	rm -rf ./build
+	rm -f ./sim.so
+	rm -f ./sim
+}	
+
+
+function compile_arg {
+	mkdir -p $BUILDDIR
+	mkdir -p $BUILDDIR/bdir
+	bsc -u -D $2 $DEBUGFLAGS -sim +RTS -K1024M -RTS -aggressive-conditions -no-warn-action-shadowing -parallel-sim-link 2 -warn-scheduler-effort -simdir $BUILDDIR/bdir -info-dir $BUILDDIR/bdir -bdir $BUILDDIR/bdir -p +:$INCLUDE $TBDIR/$1
+	bsc -u -D $2 $DEBUGFLAGS -sim -e mkTestbench +RTS -K1024M -RTS -bdir $BUILDDIR/bdir -info-dir $BUILDDIR/bdir -simdir $BUILDDIR/bdir -warn-scheduler-effort -parallel-sim-link 2 -Xc++ -O0 -o sim 
+	mv sim $BUILDDIR/bdir
+	mv sim.so $BUILDDIR/bdir
+}
+
+function run_test {
+	./$BUILDDIR/bdir/sim
+}
+
+case "$1" in
+	-c)
+        echo "Compiling Testbench: $2";
+        compile_arg $2 $3;;
+	-clean) clean;;
+	-r) run_test;;
+	-h|--help|*)  echo " ";
+			echo "Usage : $0 (flag) (routing)";
+			echo "flag list: [-c : compile all] [-clean : cleanup build files] [ -r : run test ] ";
+			echo " ";;
+esac

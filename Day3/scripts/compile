@@ -1,0 +1,72 @@
+#!/bin/bash
+
+SRCPATH=./
+LOGDIR=./Log
+BUILDDIR=./build
+CXXFLAGS="-Wall -Wno-unused -O0 -g -D_FILE_OFFSET_BITS=64 -j 4"
+
+MS_INCLUDE="accelerator/global_buffer:accelerator/processing_element/WS:accelerator/processing_element/RS:NoCs/microswitch/:NoCs/common/:common_lib:configs/microswitch_types:configs/neuralnetwork_types"
+
+DEBUGFLAGS='
+            -D DUMMY
+            '
+#            -D DEBUG_WS_PE_WEIGHT
+#            -D DEBUG_GLOBALBUFFER
+#            -D DEBUG_GLOBALBUFFERUNIT
+#            -D DEBUG_GLOBALBUFFERNIC
+#            -D DEBUG_WS_MESHNIC
+#            -D DEBUG_WS_PE
+#            -D DEBUG_WS_PE_UNIT
+#            -D DEBUG_WS_PE_ARRAY
+#            -D Debug_RS_MSNIC
+#            -D DEBUG_BUS
+#            -D DEBUG_TOPSWITCH
+#            -D DEBUG_MIDDLESWITCH
+#            -D DEBUG_BOTTOMSWITCH
+#            -D DEBUG_MICROSWITCHNETWORK
+
+function clean {
+	rm -rf $BUILDDIR
+	rm -rf $LOGDIR
+    rm -rf Verilog
+	rm -rf *.v
+	rm -rf ./bdir
+	rm -rf ./build
+	rm -f ./sim.so
+	rm -f ./sim
+}	
+
+function compile_ms_sim {
+	mkdir -p $BUILDDIR
+	mkdir -p $BUILDDIR/bdir
+	bsc -u -sim +RTS -K1024M -RTS -aggressive-conditions -no-warn-action-shadowing -parallel-sim-link 4 -warn-scheduler-effort -D MS -D $1 -simdir $BUILDDIR/bdir -info-dir $BUILDDIR/bdir -bdir $BUILDDIR/bdir $DEBUGFLAGS -p +:$MS_INCLUDE ./TopModule.bsv
+	bsc -u -sim -e mkTopModule +RTS -K1024M -RTS -D MS -D $1 -bdir $BUILDDIR/bdir -info-dir $BUILDDIR/bdir -simdir $BUILDDIR/bdir $DEBUGFLAGS -warn-scheduler-effort -parallel-sim-link 4 -Xc++ -O0 -o sim 
+	mv sim $BUILDDIR/bdir
+	mv sim.so $BUILDDIR/bdir
+}
+
+function compile_ms_verilog {
+	mkdir -p $BUILDDIR
+	mkdir -p $BUILDDIR/bdir
+	bsc -verilog -g mkMicroswitchNetwork +RTS -K1024M -RTS -aggressive-conditions -no-warn-action-shadowing -simdir $BUILDDIR/bdir -info-dir $BUILDDIR/bdir -bdir $BUILDDIR/bdir -D MS -p +:$MS_INCLUDE -u ./NoCs/microswitch/MicroswitchNetwork.bsv
+    mkdir -p MSVerilog
+    mv NoCs/microswitch/*.v ./MSVerilog/
+}
+
+
+
+function run_test {
+	./$BUILDDIR/bdir/sim
+}
+
+case "$1" in
+    -ms) compile_ms_sim WS;;
+    -rms) compile_ms_sim RS;;
+    -msv) compile_ms_verilog;;
+	-clean) clean;;
+	-r) run_test;;
+	-h|--help|*)  echo " ";
+			echo "Usage : $0 (flag)";
+            echo "flag list: [-ms : microswitch simulation (WS)] [-rms: microswitch simulation (RS)] [-msv: generate Verilog RTL] [-clean : delete build files] [ -r : run test ] ";
+			echo " ";;
+esac

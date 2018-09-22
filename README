@@ -1,3 +1,17 @@
-How to add vim syntax?
+Lab assignment code for three-day lecture, "Designing CNN Accelerators using Bluespec System Verilog", given in Seoul National University in December 2017.
+
+For lab assignment descriptions, please refer to slides in /documents directory.
+
+* These lab assignements are based on Bluespec System Verilog (http://bluespec.com).
+	You need Bluespec compiler license to run simulations for lab assignments.
+	Bluespec offers university program: please refer to the website (http://bluespec.com/university/)
+
+* Compiling code
+In each lab, I added a make file that launches compilation script with right option.
+	> make : Compile Blue-sim cycle accurate simulation
+	> make run : Run the compiled simulation
+	> make clean : Clean up build files
+	
+* How to add vim syntax?
 	> mkdir ~/.vim
 	> cp -r vim_syntax/* ~/.vim 

@@ -1,4 +1,5 @@
 Lab assignment code for three-day lecture, "Designing CNN Accelerators using Bluespec System Verilog", given in Seoul National University in December 2017.
+Author: Hyoukjun Kwon (hyoukjun@gatech.edu)
 
 For lab assignment descriptions, please refer to slides in /documents directory.
 
